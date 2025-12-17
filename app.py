@@ -11,6 +11,14 @@ app.config['SECRET_KEY'] = 'my_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///video-meeting.db'
 db.init_app(app)
 
+login_manager = LoginManager()
+login_manager.login_view = 'login'
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Register.query.get(int(user_id))
+
 class Register(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), unique=True, nullable=False)
@@ -27,6 +35,12 @@ class Register(db.Model):
     
     def get_id(self):
         return str(self.id)
+
+    def is_authenticated(self):
+        return True
+
+    # def is_anonymous(self):
+    #     return False
 
 
 with app.app_context():
@@ -65,6 +79,7 @@ def login():
     return render_template("login.html", form=form)
 
 @app.route("/logout", methods=["GET"])
+@login_required
 def logout():
     logout_user()
     flash("You have been logged out successfully!")
@@ -90,14 +105,17 @@ def register():
     return render_template("register.html", form=form)
 
 @app.route("/dashboard")
+@login_required
 def dashboard():
     return render_template("dashboard.html", first_name=current_user.first_name, last_name=current_user.last_name)
 
 @app.route("/meeting")
+@login_required
 def meeting():
     return render_template("meeting.html")
 
 @app.route("/join")
+@login_required
 def join():
     return render_template("join.html")
 
