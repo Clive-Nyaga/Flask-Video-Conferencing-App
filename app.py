@@ -112,11 +112,14 @@ def dashboard():
 @app.route("/meeting")
 @login_required
 def meeting():
-    return render_template("meeting.html")
+    return render_template("meeting.html", username=current_user.username)
 
-@app.route("/join")
+@app.route("/join", methods=["GET", "POST"])
 @login_required
 def join():
+    if request.method == "POST":
+        room_id = request.form.get("roomID")
+        return redirect(f"/meeting?roomID={room_id}")
     return render_template("join.html")
 
 # @app.route("/logout")
